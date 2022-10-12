@@ -54,13 +54,15 @@ ImageBoxImage.Size = new Size(400, 400);
 ImageBoxImage.BackColor = Color.White;
 ImageBoxImage.Image = ImageBoxDrawing;
 
-
+int GetPlayer(){
+    return currentPlayer % 2 + 1; //0 = even - red, 1 = odd - blue, +1 to corrrect for 0 = empty
+}
 
 void UpdateBoard() {
     //logic
 
 
-
+    //HUGOOOOOOOOOOOOOOOOOOOOOOOOO Gebruik squares én GetViableLocations(), kijk er ff naar
 
     
     scherm.Invalidate();
@@ -84,12 +86,64 @@ void UpdateBoard() {
 
 UpdateBoard();
 
-void CreateStone(int cellX, int cellY, int ownerId){
-    //plaats nieuw steen
-    ConvertXYToListIndex(cellX, cellY);
+void CheckCaptured(int index){
+    //check between, end on end of row
+    int rowIndex = index/ amountOfCells;
+    int indexesTillEndOfRow = amountOfCells - rowIndex;
+    for (int zeroIndex = 1; zeroIndex < indexesTillEndOfRow; zeroIndex++)
+    {
+        int squareChecked = squares[index + zeroIndex];
+        int previousSquareChecked = squares[index + zeroIndex - 1];
+        if(squareChecked == GetPlayer() && (previousSquareChecked != GetPlayer() && previousSquareChecked != 0)){
+            break; //gotten to own stone
+        }
+    }
 }
+
+CheckCaptured(7);
+
+void CheckHorizontal(){
+    
+}
+
+void CheckVertical(int index){
+    int nextCell = index + amountOfCells;
+    //nextCell - amountOfCells;
+}
+
+void CheckDiagonal(int index){
+    int nextCell = index + (amountOfCells -1); //next (or previous) row - 1 --> checks diagonal
+    //Check
+    nextCell = index + (amountOfCells + 1);
+    //Check
+}
+
+
+
+bool CheckIfViableLocation(int index){
+    //Check if index is a viable location to place a stone (sluit een of meerdere andere stones in)
+    if(squares[index] != 0){
+        return false; // if stone is present
+    }
+
+
+    return true;
+}
+
+void CreateStone(int cellX, int cellY){
+    //plaats nieuw steen
+    int index = ConvertXYToListIndex(cellX, cellY);
+    int currentSquare = squares[index];
+
+    //not possible if stone is already present --> has to be 0
+    if(currentSquare == 0 && CheckIfViableLocation(index)){
+        squares[index] = GetPlayer(currentPlayer); //0 = empty, so + 1
+    };
+}
+
 int ConvertXYToListIndex(int x, int y){
-    return 5;
+    //Hier is ervan uitgegaan dat x en y starten op 0
+    return y*amountOfCells + x; //rijen * aantal cells in de rij + overgen: x
 }
 
 int PixelToCell(int mousePixel) {
@@ -107,6 +161,7 @@ void ImageBoxImage_MouseClick(object sender, MouseEventArgs mea) {
     int cellX = PixelToCell(mea.X);
     int cellY = PixelToCell(mea.Y);
 
+    CreateStone(cellX, cellY);
     
 }
 
