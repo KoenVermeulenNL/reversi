@@ -73,6 +73,36 @@ int GetPlayer(){
     return currentPlayer % 2 + 1; //1 = even - red, 2 = odd - blue, +1 to corrrect for 0 = empty
 }
 
+void createBoard(){
+    int X = 0;
+    int Y = 0;
+
+    for (int i = 0; i < amountOfCells; i++) {
+        for (int j = 0; j< amountOfCells;j++) {
+            // if (j%2 == 0) {
+            //     ImageBoxDrawer.DrawRectangle(Pens.White, X, Y, (int)cellWidth, (int)cellWidth);
+            // } else {
+            //     
+            // }
+            if (i%2 == 0) {
+                if (j%2 == 0) ImageBoxDrawer.FillRectangle(Brushes.White, X, Y, (int)cellWidth, (int)cellWidth);
+                else ImageBoxDrawer.FillRectangle(Brushes.LightGray, X, Y, (int)cellWidth, (int)cellWidth);
+            } else {
+                if (j%2 == 0) ImageBoxDrawer.FillRectangle(Brushes.LightGray, X, Y, (int)cellWidth, (int)cellWidth);
+                else ImageBoxDrawer.FillRectangle(Brushes.White, X, Y, (int)cellWidth, (int)cellWidth);
+
+            }
+
+
+            X += (int)cellWidth;
+        }
+        X = 0;
+        Y += (int)cellWidth;
+    }
+
+
+}
+
 void UpdateBoard() {
     //logic
 
@@ -82,43 +112,46 @@ void UpdateBoard() {
     //en gebruik squares[,]
     //Voor de aanduiding welke moves mogelijk zijn kun je deze functie gebruiken: CheckIfViableLocation(CELLX, CELLY)
     //succes
+    createBoard();
 
-    
-    scherm.Invalidate();
-    int x = 0;
-    int y = 0;
-    for (int i = 0; i < amountOfCells; i++) {
-        for (int j = 0; j< amountOfCells; j++) {
-            j+=i;
-            if (j%2 == 0) {
-                ImageBoxDrawer.FillRectangle(Brushes.Black, x, y, (int)(x+cellWidth), (int)(y+cellWidth));
-            } else if (j%2 != 0) {
-                ImageBoxDrawer.FillRectangle(Brushes.White, x, y, (int)(x+cellWidth), (int)(y+cellWidth));
+    scherm.Text = Convert.ToString(GetPlayer());
+
+    for (int col = 0; col < squares.GetLength(1); col++) {
+        for (int row = 0; row < squares.GetLength(0); row++) {
+            if (squares[col, row] == 1) {
+                ImageBoxDrawer.FillEllipse(Brushes.Red, (row*(int)cellWidth), (col*(int)cellWidth), (int)cellWidth, (int)cellWidth);
+            } else if (squares[col, row] == 2) {
+                ImageBoxDrawer.FillEllipse(Brushes.Blue, (row*(int)cellWidth), (col*(int)cellWidth), (int)cellWidth, (int)cellWidth);
             }
 
-            x += (int)cellWidth;
+            if (CheckIfViableLocation(row, col)) {
+                ImageBoxDrawer.DrawEllipse(Pens.Purple, (row*(int)cellWidth), (col*(int)cellWidth), (int)cellWidth, (int)cellWidth);
+            }
         }
-        x=0;
-        y+= (int)cellWidth;
     }
+
+    ImageBoxImage.Invalidate();
 }
 
 UpdateBoard();
 
-int CheckCaptured(int[] rowList, int columnPosition){
+int CheckCaptured(int[] rowList, int columnPosition, int cellX, int cellY){
     //Expected input: array of entire row converted from any direction to horizontal. 
+    
+
     if(rowList.Length != amountOfCells){
+        MessageBox.Show("error", "rowList.Length is not the same length as the board width");
         return 0; //0 means not possible
     }
     int indexesTillEndOfRow = amountOfCells - columnPosition - 1; //-1 to correct for index starts at 0
-    int checkedForwards =  CheckCapturedLine(rowList, columnPosition, indexesTillEndOfRow); //returns the index of the rowList that the next own piece is located, so all pieces in between can be captured
+    int checkedForwards =  CheckCapturedLine(rowList, columnPosition, indexesTillEndOfRow, cellX, cellY); //returns the index of the rowList that the next own piece is located, so all pieces in between can be captured
    
     Array.Reverse(rowList);
     int reverseIndexesTillEndOfRow = amountOfCells - indexesTillEndOfRow - 1; //get the Oposite by subtracting from board width, again - 1 to correct for index starts at 0
     columnPosition = amountOfCells - columnPosition - 1;
     
-    int checkedBackwards = CheckCapturedLine(rowList, columnPosition, reverseIndexesTillEndOfRow); //returns the index of the rowList that the next own piece is located, so all pieces in between can be captured
-
+    int checkedBackwards = CheckCapturedLine(rowList, columnPosition, reverseIndexesTillEndOfRow, cellX, cellY); //returns the index of the rowList that the next own piece is located, so all pieces in between can be captured
+    
     if(checkedForwards != 0){
         return checkedForwards;
     }
@@ -128,8 +161,14 @@ int CheckCaptured(int[] rowList, int columnPosition){
     return 0; //0 means not possible
 }
 
-int CheckCapturedLine(int[] rowList, int columnPosition, int iTER){
-    //Debug.WriteLine(String.Join(",", rowList));
+int CheckCapturedLine(int[] rowList, int columnPosition, int iTER, int cellX, int cellY){
+    if(cellX == 1 && cellY == 4){
+    Debug.WriteLine(String.Join(";", rowList));
+    Debug.WriteLine(squares[cellY, cellX]);
+    Debug.WriteLine(squares[cellY, cellX + 1]);
+    Debug.WriteLine(squares[cellY, cellX + 2]);
+    }
+
     for (int zeroIndex = 1; zeroIndex <= iTER; zeroIndex++) 
     {
         //zeroIndex = 1, because it doesn't have to check its own position
@@ -164,7 +203,10 @@ int CheckHorizontal(int cellX, int cellY){
     
     //simplify to 1D row
     int[] currentRow = GetHorizontalRow(rowIndex);
-    return CheckCaptured(currentRow, columnPosition);
+    if(cellX == 1 && cellY == 4){
+    Debug.WriteLine("currentRow: " + String.Join(";", currentRow));
+    }
+    return CheckCaptured(currentRow, columnPosition, cellX, cellY);
 }
 int[] GetHorizontalRow(int rowIndex){ //rowIndex = Y of cell
     int[] currentRow = {};
@@ -179,7 +221,7 @@ int[] GetHorizontalRow(int rowIndex){ //rowIndex = Y of cell
 int CheckVertical(int cellX, int cellY){
     //simplify to 1D row
     int[] currentColumn = GetVerticalRow(cellX);
-    return CheckCaptured(currentColumn, cellY);
+    return CheckCaptured(currentColumn, cellY, cellX, cellY);
 }
 int[] GetVerticalRow(int cellX){
     int[] currentColumn = {};
@@ -235,7 +277,7 @@ int CheckDiagonalLeftToRight(int cellX, int cellY){
             
         }
     }
-    return CheckCaptured(currentDiagonalLine, currentPosition); 
+    return CheckCaptured(currentDiagonalLine, currentPosition, cellX, cellY); 
 }
 int CheckDiagonalRightToLeft(int cellX, int cellY){
     //simplify to 1D row
@@ -254,25 +296,26 @@ int CheckDiagonalRightToLeft(int cellX, int cellY){
         if((amountOfCells - cellX - 1) > (amountOfCells - cellY - 1)){ //reverse the grid, so the same logic of Left to Right can be used
             //Pretty proud of this one tbh, there is probably another way, but this works ;)
             if(cellX - (currentPosition - i) < amountOfCells){
-                currentDiagonalLine[i] = squares[cellX - (currentPosition - i), i]; //first row, then column
+                currentDiagonalLine[i] = squares[i, cellX - (currentPosition - i)]; //first row, then column
             }   else {
                 currentDiagonalLine[i] = 0; //diagonal line is smaller than board width, so populate with 0
             }
         } else {
             if(cellY - (currentPosition - i) < amountOfCells && cellX - (currentPosition - i) < amountOfCells){
-                currentDiagonalLine[i] = squares[cellY - (currentPosition - i), cellX - (currentPosition - i)]; //first row, then column
+                currentDiagonalLine[i] = squares[cellX - (currentPosition - i), cellY - (currentPosition - i)]; //first row, then column
             }   else {
                 currentDiagonalLine[i] = 0; //diagonal line is smaller than board width, so populate with 0
             }
             
         }
     }
-    return CheckCaptured(currentDiagonalLine, currentPosition); 
+    return CheckCaptured(currentDiagonalLine, currentPosition, cellX, cellY); 
 }
 
 bool CheckIfViableLocation(int cellX, int cellY){
+
     //Check if index is a viable location to place a stone (sluit een of meerdere andere stones in)
-    if(squares[cellX, cellY] != 0){
+    if(squares[cellY, cellX] != 0){
         return false; // if stone is present
     }
 
@@ -294,12 +337,17 @@ bool CheckIfViableLocation(int cellX, int cellY){
 
 void CreateStone(int cellX, int cellY){
     //plaats nieuw steen
-    int currentSquare = squares[cellX, cellY];
+    int currentSquare = squares[cellY, cellX]; //first row, then column
 
     //not possible if stone is already present --> has to be 0
     if(currentSquare == 0 && CheckIfViableLocation(cellX, cellY)){
-        squares[cellX, cellY] = GetPlayer(); //0 = empty, so + 1
+        
+        squares[cellY, cellX] = GetPlayer(); //0 = empty, so + 1
+        
         CaptureStones(cellX, cellY);
+
+        currentPlayer++;
+        
     };
 }
 
@@ -310,13 +358,13 @@ void CaptureStones(int cellX, int cellY){
         //Got a hit
         if(horizontalIndex > 0){
             //done forwards
-            for (int i = 1; i < (horizontalIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
+            for (int i = 1; i <= (horizontalIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
             {
                 squares[cellY, cellX + i] = GetPlayer(); //Set stone to own player
             }
         } else {
             //done backwards
-            for (int i = 1; i < (horizontalIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
+            for (int i = 1; i <= (-horizontalIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
             {
                 squares[cellY, cellX - i] = GetPlayer(); //Set stone to own player
             }
@@ -327,13 +375,13 @@ void CaptureStones(int cellX, int cellY){
         //Got a hit
         if(verticalIndex > 0){
             //done forwards
-            for (int i = 1; i < (verticalIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
+            for (int i = 1; i <= (verticalIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
             {
                 squares[cellY + i, cellX] = GetPlayer(); //Set stone to own player
             }
         } else {
             //done backwards
-            for (int i = 1; i < (verticalIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
+            for (int i = 1; i <= (-verticalIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
             {
                 squares[cellY - i, cellX] = GetPlayer(); //Set stone to own player
             }
@@ -344,13 +392,13 @@ void CaptureStones(int cellX, int cellY){
         //Got a hit
         if(verticalIndex > 0){
             //done forwards
-            for (int i = 1; i < (diagonalIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
+            for (int i = 1; i <= (diagonalIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
             {
                 squares[cellY + i, cellX + i] = GetPlayer(); //Set stone to own player
             }
         } else {
             //done backwards
-            for (int i = 1; i < (diagonalIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
+            for (int i = 1; i <= (-diagonalIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
             {
                 squares[cellY - i, cellX - i] = GetPlayer(); //Set stone to own player
             }
@@ -375,6 +423,22 @@ void ImageBoxImage_MouseClick(object sender, MouseEventArgs mea) {
 
     CreateStone(cellX, cellY);
     
+    UpdateBoard();
+}
+
+newGameBtn.MouseClick += newGameBtn_MouseClick;
+void newGameBtn_MouseClick(object sender, MouseEventArgs mea) {
+    for (int i = 0; i < amountOfCells; i++)
+    {
+        for (int j = 0; j < amountOfCells; j++)
+        {
+            squares[i,j] = 0;
+        }
+    }
+    squares[(amountOfCells/2-1), (amountOfCells/2-1)] = squares[(amountOfCells/2), (amountOfCells/2)] = 1; //populate board with middle pieces, works for (almost) every board width
+squares[(amountOfCells/2-1), (amountOfCells/2)] = squares[(amountOfCells/2), (amountOfCells/2 -1)] = 2; //populate board with middle pieces, works for (almost) every board width
+    currentPlayer = 0;
+    UpdateBoard();
 }
 
 Application.Run(scherm);
