@@ -162,12 +162,12 @@ int CheckCaptured(int[] rowList, int columnPosition, int cellX, int cellY){
 }
 
 int CheckCapturedLine(int[] rowList, int columnPosition, int iTER, int cellX, int cellY){
-    if(cellX == 1 && cellY == 4){
+    /*if(cellX == 1 && cellY == 4){
     Debug.WriteLine(String.Join(";", rowList));
     Debug.WriteLine(squares[cellY, cellX]);
     Debug.WriteLine(squares[cellY, cellX + 1]);
     Debug.WriteLine(squares[cellY, cellX + 2]);
-    }
+    }*/
 
     for (int zeroIndex = 1; zeroIndex <= iTER; zeroIndex++) 
     {
@@ -203,9 +203,6 @@ int CheckHorizontal(int cellX, int cellY){
     
     //simplify to 1D row
     int[] currentRow = GetHorizontalRow(rowIndex);
-    if(cellX == 1 && cellY == 4){
-    Debug.WriteLine("currentRow: " + String.Join(";", currentRow));
-    }
     return CheckCaptured(currentRow, columnPosition, cellX, cellY);
 }
 int[] GetHorizontalRow(int rowIndex){ //rowIndex = Y of cell
@@ -236,14 +233,14 @@ int[] GetVerticalRow(int cellX){
 int CheckDiagonal(int cellX, int cellY){
     //4 directions
     int diagonalLTR = CheckDiagonalLeftToRight(cellX, cellY);
-    int diagonalRTL = CheckDiagonalRightToLeft(cellX, cellY);
+    //int diagonalRTL = CheckDiagonalRightToLeft(cellX, cellY);
     
     if(diagonalLTR != 0){
         return diagonalLTR;
     }
-    if(diagonalRTL != 0){
+    /*if(diagonalRTL != 0){
         return diagonalRTL;
-    }
+    }*/
     return 0; //0 means not possible
 }
 
@@ -279,14 +276,15 @@ int CheckDiagonalLeftToRight(int cellX, int cellY){
     }
     return CheckCaptured(currentDiagonalLine, currentPosition, cellX, cellY); 
 }
+
 int CheckDiagonalRightToLeft(int cellX, int cellY){
     //simplify to 1D row
 
-    int currentPosition = cellY; //current position in diagonal, not the coordinates
+    int currentPosition = (amountOfCells - cellY - 1); //current position in diagonal, not the coordinates
     if((amountOfCells - cellX - 1) > (amountOfCells - cellY - 1)){
         //if the horizontal offset is greater than the vertical offset, the current position is the same as the vertical offset
         //if both offsets are equal, it doesn't matter wich to pick
-        currentPosition = cellX;
+        currentPosition = (amountOfCells - cellX - 1);
     }
 
     int[] currentDiagonalLine = {};
@@ -295,20 +293,25 @@ int CheckDiagonalRightToLeft(int cellX, int cellY){
     {
         if((amountOfCells - cellX - 1) > (amountOfCells - cellY - 1)){ //reverse the grid, so the same logic of Left to Right can be used
             //Pretty proud of this one tbh, there is probably another way, but this works ;)
-            if(cellX - (currentPosition - i) < amountOfCells){
+            if(cellX - (currentPosition - i) < amountOfCells && cellX - (currentPosition - i) > 0){
                 currentDiagonalLine[i] = squares[i, cellX - (currentPosition - i)]; //first row, then column
             }   else {
                 currentDiagonalLine[i] = 0; //diagonal line is smaller than board width, so populate with 0
             }
         } else {
-            if(cellY - (currentPosition - i) < amountOfCells && cellX - (currentPosition - i) < amountOfCells){
-                currentDiagonalLine[i] = squares[cellX - (currentPosition - i), cellY - (currentPosition - i)]; //first row, then column
+            if(cellY - (currentPosition - i) < amountOfCells && cellX - (currentPosition - i) < amountOfCells && (cellY - (currentPosition - i) > 0 && cellX - (currentPosition - i) > 0)){
+                currentDiagonalLine[i] = squares[cellY - (currentPosition - i), cellX - (currentPosition - i)]; //first row, then column
             }   else {
                 currentDiagonalLine[i] = 0; //diagonal line is smaller than board width, so populate with 0
             }
-            
+   
         }
     }
+    if(cellY == 4 && cellX == 4){
+        Debug.WriteLine(currentPosition);
+        Debug.WriteLine(String.Join(";", currentDiagonalLine));
+    }
+
     return CheckCaptured(currentDiagonalLine, currentPosition, cellX, cellY); 
 }
 
@@ -321,7 +324,8 @@ bool CheckIfViableLocation(int cellX, int cellY){
 
     int checkedHorizontal = CheckHorizontal(cellX, cellY);
     int checkedVertical = CheckVertical(cellX, cellY);
-    int checkedDiagonal = CheckDiagonal(cellX, cellY);
+    int checkedDiagonalLTR = CheckDiagonalLeftToRight(cellX, cellY);
+    //int checkedDiagonalRTL = CheckDiagonalRightToLeft(cellX, cellY);
 
     if(checkedHorizontal != 0){
         return true;
@@ -329,9 +333,12 @@ bool CheckIfViableLocation(int cellX, int cellY){
     if(checkedVertical != 0){
         return true;
     }
-    if(checkedDiagonal != 0){
+    if(checkedDiagonalLTR != 0){
         return true;
     }
+    /*if(checkedDiagonalRTL != 0){
+        return true;
+    }*/
     return false; //0 means not possible
 }
 
@@ -387,23 +394,40 @@ void CaptureStones(int cellX, int cellY){
             }
         }
     }
-    int diagonalIndex = CheckDiagonal(cellX, cellY);
-    if(diagonalIndex != 0){
+    int diagonalLTRIndex = CheckDiagonalLeftToRight(cellX, cellY);
+    if(diagonalLTRIndex != 0){
         //Got a hit
-        if(verticalIndex > 0){
+        if(diagonalLTRIndex > 0){
             //done forwards
-            for (int i = 1; i <= (diagonalIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
+            for (int i = 1; i <= (diagonalLTRIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
             {
                 squares[cellY + i, cellX + i] = GetPlayer(); //Set stone to own player
             }
         } else {
             //done backwards
-            for (int i = 1; i <= (-diagonalIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
+            for (int i = 1; i <= (-diagonalLTRIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
             {
                 squares[cellY - i, cellX - i] = GetPlayer(); //Set stone to own player
             }
         }
     }
+    /*int diagonalRTLIndex = CheckDiagonalRightToLeft(cellX, cellY);
+    if(diagonalRTLIndex != 0){
+        //Got a hit
+        if(diagonalRTLIndex > 0){
+            //done forwards
+            for (int i = 1; i <= (diagonalRTLIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
+            {
+                squares[cellY - i, cellX + i] = GetPlayer(); //Set stone to own player
+            }
+        } else {
+            //done backwards
+            for (int i = 1; i <= (-diagonalRTLIndex - 1); i++) //begin with 1, 0 is own stone; - 1 because last stone is also own stone
+            {
+                squares[cellY + i, cellX - i] = GetPlayer(); //Set stone to own player
+            }
+        }
+    }*/
 };
 
 int PixelToCell(int mousePixel) {
