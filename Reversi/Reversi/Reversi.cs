@@ -280,37 +280,32 @@ int CheckDiagonalLeftToRight(int cellX, int cellY){
 int CheckDiagonalRightToLeft(int cellX, int cellY){
     //simplify to 1D row
 
-    int currentPosition = (amountOfCells - cellY - 1); //current position in diagonal, not the coordinates
-    if((amountOfCells - cellX - 1) > (amountOfCells - cellY - 1)){
-        //if the horizontal offset is greater than the vertical offset, the current position is the same as the vertical offset
-        //if both offsets are equal, it doesn't matter wich to pick
-        currentPosition = (amountOfCells - cellX - 1);
-    }
+    int currentPosition = cellY; //current position in diagonal, not the coordinates
+    int cellYInverted = amountOfCells - cellY - 1;
 
     int[] currentDiagonalLine = {};
-    Array.Resize(ref currentDiagonalLine, amountOfCells);
-    for (int i = 0; i < amountOfCells; i++) //Diagonal has also board widht as its length
+    Array.Resize(ref currentDiagonalLine, amountOfCells); //populate diagonal line with board with, even though the width of a diagonal can be smaller
+    for (int i = 0; i < amountOfCells; i++) //i is leading --> begins at first row, so right to left
     {
-        if((amountOfCells - cellX - 1) > (amountOfCells - cellY - 1)){ //reverse the grid, so the same logic of Left to Right can be used
-            //Pretty proud of this one tbh, there is probably another way, but this works ;)
-            if(cellX - (currentPosition - i) < amountOfCells && cellX - (currentPosition - i) > 0){
-                currentDiagonalLine[i] = squares[i, cellX - (currentPosition - i)]; //first row, then column
-            }   else {
+    
+    if(cellX > cellYInverted){
+            if(cellX + (currentPosition - i) < amountOfCells){
+                currentDiagonalLine[i] = squares[i, cellX + (currentPosition - i)]; //first row, then column
+            } else {
                 currentDiagonalLine[i] = 0; //diagonal line is smaller than board width, so populate with 0
             }
-        } else {
-            if(cellY - (currentPosition - i) < amountOfCells && cellX - (currentPosition - i) < amountOfCells && (cellY - (currentPosition - i) > 0 && cellX - (currentPosition - i) > 0)){
-                currentDiagonalLine[i] = squares[cellY - (currentPosition - i), cellX - (currentPosition - i)]; //first row, then column
-            }   else {
+    } else {
+        if(cellX + (currentPosition - i) > 0){
+                currentDiagonalLine[i] = squares[i, cellX + (currentPosition - i)]; //first row, then column
+            } else {
                 currentDiagonalLine[i] = 0; //diagonal line is smaller than board width, so populate with 0
             }
-   
-        }
     }
-    if(cellY == 4 && cellX == 4){
+    }
+    /*if(cellY == 4 && cellX == 1){
         Debug.WriteLine(currentPosition);
         Debug.WriteLine(String.Join(";", currentDiagonalLine));
-    }
+    }*/
 
     return CheckCaptured(currentDiagonalLine, currentPosition, cellX, cellY); 
 }
@@ -325,7 +320,7 @@ bool CheckIfViableLocation(int cellX, int cellY){
     int checkedHorizontal = CheckHorizontal(cellX, cellY);
     int checkedVertical = CheckVertical(cellX, cellY);
     int checkedDiagonalLTR = CheckDiagonalLeftToRight(cellX, cellY);
-    //int checkedDiagonalRTL = CheckDiagonalRightToLeft(cellX, cellY);
+    int checkedDiagonalRTL = CheckDiagonalRightToLeft(cellX, cellY);
 
     if(checkedHorizontal != 0){
         return true;
@@ -336,9 +331,9 @@ bool CheckIfViableLocation(int cellX, int cellY){
     if(checkedDiagonalLTR != 0){
         return true;
     }
-    /*if(checkedDiagonalRTL != 0){
+    if(checkedDiagonalRTL != 0){
         return true;
-    }*/
+    }
     return false; //0 means not possible
 }
 
@@ -411,7 +406,7 @@ void CaptureStones(int cellX, int cellY){
             }
         }
     }
-    /*int diagonalRTLIndex = CheckDiagonalRightToLeft(cellX, cellY);
+    int diagonalRTLIndex = -CheckDiagonalRightToLeft(cellX, cellY); //invert direction
     if(diagonalRTLIndex != 0){
         //Got a hit
         if(diagonalRTLIndex > 0){
@@ -427,7 +422,7 @@ void CaptureStones(int cellX, int cellY){
                 squares[cellY + i, cellX - i] = GetPlayer(); //Set stone to own player
             }
         }
-    }*/
+    }
 };
 
 int PixelToCell(int mousePixel) {
