@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.IO;
 using System.Diagnostics;
 
 int SCREEN_WIDTH = 600;
@@ -23,11 +24,14 @@ BadplayPlayer.SoundLocation = "Bad-Placement.wav";
 
 
 int amountOfCells = 6; // 6 = board of 6x6
+int amountOfTurns = 0;
 
 double cellWidth = boardWidth/amountOfCells;
 double stoneRadius = (boardWidth/amountOfCells)/2;
 bool showViableLocation = true;
 bool playingSound = true;
+
+int highscore = Convert.ToInt32(File.ReadAllText(@"highscore.txt"));
 
 int currentPlayer = 0; // even = red odd = blue
 
@@ -328,15 +332,18 @@ void UpdateBoard() {
     CurrentPlayerLabel.Invalidate();
     
     if (amountOfTrueLocations==0) {
+        if (amountOfTurns < highscore) {
+            File.WriteAllText(@"highscore.txt", amountOfTurns.ToString());
+        }
         if (amountBlue == amountRed) {
-            MessageBox.Show("Its a tie!! ");
+            MessageBox.Show($"Its a tie!! \n with {amountOfTurns} turns");
             menu();
         }
         else if (amountBlue > amountRed) {
-            MessageBox.Show("Blue wins!! ");
+            MessageBox.Show($"Blue wins!! \n with {amountOfTurns} turns");
             menu();
         } else {
-            MessageBox.Show("Red wins!!");
+            MessageBox.Show($"Red wins!! \n with {amountOfTurns} turns");
             menu();
         }
     }
@@ -694,6 +701,7 @@ void ImageBoxImage_MouseClick(object sender, MouseEventArgs mea) {
     
     if (CheckIfViableLocation(cellX, cellY)) {
         GoodplayPlayer.Play();
+        amountOfTurns++;
     } else {
         BadplayPlayer.Play();
     }
