@@ -19,15 +19,15 @@ int boardWidth = 400;
 
 // the three soundplayer for backgroundmusic, if you place a wrong stone and if you place a good stone
 System.Media.SoundPlayer player = new System.Media.SoundPlayer();
-player.SoundLocation = "../../../backgroundmusic.wav";
+player.SoundLocation = "../../../sounds/backgroundmusic.wav";
 Debug.WriteLine(Environment.CurrentDirectory);
 player.PlayLooping();
 
 System.Media.SoundPlayer GoodplayPlayer = new System.Media.SoundPlayer();
-GoodplayPlayer.SoundLocation = "../../../Good-Placement.wav";
+GoodplayPlayer.SoundLocation = "../../../sounds/Good-Placement.wav";
 
 System.Media.SoundPlayer BadplayPlayer = new System.Media.SoundPlayer();
-BadplayPlayer.SoundLocation = "../../../Bad-Placement.wav";
+BadplayPlayer.SoundLocation = "../../../sounds/Bad-Placement.wav";
 
 
 int amountOfCells = 6; // 6 = board of 6x6
@@ -287,14 +287,14 @@ settings.Location = new Point(((scherm.Width-16)/2)+5, 360);
 settings.Text = "Settings";
 
 Button SoundButtonOff = new Button();
-SoundButtonOff.Image = Image.FromFile("../../../volume-off-indicator.png");
+SoundButtonOff.Image = Image.FromFile("../../../images/volume-off-indicator.png");
 SoundButtonOff.BackColor = Color.Transparent;
 SoundButtonOff.FlatStyle = FlatStyle.Flat;
 SoundButtonOff.Size = new Size(42, 42);
 SoundButtonOff.Location = new Point(SCREEN_WIDTH-45, SCREEN_HEIGHT-45);
 
 Button SoundButtonOn = new Button();
-SoundButtonOn.Image = Image.FromFile("../../../speaker-filled-audio-tool.png");
+SoundButtonOn.Image = Image.FromFile("../../../images/speaker-filled-audio-tool.png");
 SoundButtonOn.BackColor = Color.Transparent;
 SoundButtonOn.FlatStyle = FlatStyle.Flat;
 SoundButtonOn.Size = new Size(42, 42);
@@ -822,6 +822,7 @@ void ImageBoxImage_MouseClick(object sender, MouseEventArgs mea) {
 
     // if you want to play multiplayer
     if (MultiplayerBool) {
+        showViableLocation = true;
         // This checks for the mouse click, make it a cell and then plays the board.
         cellX = PixelToCell(mea.X);
         cellY = PixelToCell(mea.Y);
@@ -915,7 +916,7 @@ void menu() {
     DeleteAllWidgets();
 
     // scherm.BackColor = Color.FromArgb(32, 32, 32);
-    scherm.BackgroundImage = Image.FromFile("../../../background.png");
+    scherm.BackgroundImage = Image.FromFile("../../../images/background.png");
     scherm.BackgroundImageLayout = ImageLayout.Stretch;
     scherm.Controls.Add(MENU);
     scherm.Controls.Add(reversi);

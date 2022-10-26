@@ -9,7 +9,7 @@ class HamburgerMenu : Button {
         // sets initail variables
         this.MouseClick += changeLayout;
         this.Size = new Size(20, 20);
-        this.Image = Image.FromFile("../../../HamburgerClosed.png");
+        this.Image = Image.FromFile("../../../images/HamburgerClosed.png");
         this.BackColor = Color.Transparent;
         this.FlatStyle = FlatStyle.Flat;
         this.FlatAppearance.BorderSize = 0;
@@ -31,13 +31,13 @@ class HamburgerMenu : Button {
     private void checkLayout() {
         // if the menu is closed show three stripes
         if (Closed) {
-            this.Image = Image.FromFile("../../../HamburgerClosed.png");
+            this.Image = Image.FromFile("../../../images/HamburgerClosed.png");
             this.BackColor = Color.Transparent;
             this.FlatAppearance.MouseOverBackColor = Color.Transparent;
             this.FlatAppearance.MouseDownBackColor = Color.Transparent;
             Closed = false;
         } else { // if its open show a cross
-            this.Image = Image.FromFile("../../../HamurgerOpen.png");
+            this.Image = Image.FromFile("../../../images/HamurgerOpen.png");
             this.BackColor = Color.FromArgb(120, 27, 58, 133);
             this.FlatAppearance.MouseOverBackColor = Color.FromArgb(120, 27, 58, 133);
             this.FlatAppearance.MouseDownBackColor = Color.FromArgb(120, 27, 58, 133); 
