@@ -15,14 +15,15 @@ scherm.MinimumSize = new Size(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 int boardWidth = 400; 
 System.Media.SoundPlayer player = new System.Media.SoundPlayer();
-player.SoundLocation = "backgroundmusic.wav";
+player.SoundLocation = "../../../backgroundmusic.wav";
+Debug.WriteLine(Environment.CurrentDirectory);
 player.PlayLooping();
 
 System.Media.SoundPlayer GoodplayPlayer = new System.Media.SoundPlayer();
-GoodplayPlayer.SoundLocation = "Good-Placement.wav";
+GoodplayPlayer.SoundLocation = "../../../Good-Placement.wav";
 
 System.Media.SoundPlayer BadplayPlayer = new System.Media.SoundPlayer();
-BadplayPlayer.SoundLocation = "Bad-Placement.wav";
+BadplayPlayer.SoundLocation = "../../../Bad-Placement.wav";
 
 
 int amountOfCells = 6; // 6 = board of 6x6
@@ -35,7 +36,7 @@ bool MultiplayerBool = true;
 bool HamburgerBool = true;
 bool playingSound = true;
 
-int highscore = Convert.ToInt32(File.ReadAllText(@"highscore.txt"));
+int highscore = Convert.ToInt32(File.ReadAllText(@"../../../highscore.txt"));
 
 int currentPlayer = 0; // even = red odd = blue
 
@@ -272,14 +273,14 @@ settings.Location = new Point(((scherm.Width-16)/2)+5, 360);
 settings.Text = "Settings";
 
 Button SoundButtonOff = new Button();
-SoundButtonOff.Image = Image.FromFile("volume-off-indicator.png");
+SoundButtonOff.Image = Image.FromFile("../../../volume-off-indicator.png");
 SoundButtonOff.BackColor = Color.Transparent;
 SoundButtonOff.FlatStyle = FlatStyle.Flat;
 SoundButtonOff.Size = new Size(42, 42);
 SoundButtonOff.Location = new Point(SCREEN_WIDTH-45, SCREEN_HEIGHT-45);
 
 Button SoundButtonOn = new Button();
-SoundButtonOn.Image = Image.FromFile("speaker-filled-audio-tool.png");
+SoundButtonOn.Image = Image.FromFile("../../../speaker-filled-audio-tool.png");
 SoundButtonOn.BackColor = Color.Transparent;
 SoundButtonOn.FlatStyle = FlatStyle.Flat;
 SoundButtonOn.Size = new Size(42, 42);
@@ -408,8 +409,8 @@ void UpdateBoard() {
     
     if (amountOfTrueLocations==0) {
         if (amountOfTurns < highscore) {
-            File.WriteAllText(@"highscore.txt", amountOfTurns.ToString());
-            highscore = Convert.ToInt32(File.ReadAllText(@"highscore.txt"));
+            File.WriteAllText(@"../../../highscore.txt", amountOfTurns.ToString());
+            highscore = Convert.ToInt32(File.ReadAllText(@"../../../highscore.txt"));
         }
         if (amountBlue == amountRed) {
             MessageBox.Show($"Its a tie!! \nWith {amountOfTurns} turns");
@@ -534,7 +535,7 @@ int[] GetVerticalRow(int cellX){
 int CheckDiagonal(int cellX, int cellY){
     //4 directions
     int diagonalLTR = CheckDiagonalLeftToRight(cellX, cellY);
-    //int diagonalRTL = CheckDiagonalRightToLeft(cellX, cellY);
+    //int diagonalRTL = CheckDiagonal(RightToLeft(cellX, cellY);
     
     if(diagonalLTR != 0){
         return diagonalLTR;
@@ -796,6 +797,22 @@ List<Point> makeListOfViableLocations() {
     return ListOfViableLocations;
 }
 
+void wait(int ms)
+{
+    Timer timer = new Timer();
+    timer.Interval = ms;
+    timer.Enabled = true;
+    timer.Start();
+
+    timer.Tick += (s, e) =>
+    {
+        timer.Enabled = true;
+        timer.Stop();
+    };
+
+    while(timer.Enabled) Application.DoEvents();
+}
+
 ImageBoxImage.MouseClick += ImageBoxImage_MouseClick;
 void ImageBoxImage_MouseClick(object sender, MouseEventArgs mea) {
     //Bij Klik update board
@@ -817,6 +834,7 @@ void ImageBoxImage_MouseClick(object sender, MouseEventArgs mea) {
         cellY = PixelToCell(mea.Y);
 
         if (CheckIfViableLocation(cellX, cellY)) {
+            showViableLocation = false;
             GoodplayPlayer.Play();
             CreateStone(cellX, cellY);
             UpdateBoard();
@@ -831,8 +849,13 @@ void ImageBoxImage_MouseClick(object sender, MouseEventArgs mea) {
             amountOfTurns++;
             GoodplayPlayer.Play();
             CreateStone(cellX, cellY);
-
+            wait(1000);
+            GoodplayPlayer.Play();
+            showViableLocation = true;
             UpdateBoard();
+        }else
+        {
+            BadplayPlayer.Play();
         }
 
     }
@@ -878,7 +901,7 @@ void menu() {
     DeleteAllWidgets();
 
     // scherm.BackColor = Color.FromArgb(32, 32, 32);
-    scherm.BackgroundImage = Image.FromFile("background.png");
+    scherm.BackgroundImage = Image.FromFile("../../../background.png");
     scherm.BackgroundImageLayout = ImageLayout.Stretch;
     scherm.Controls.Add(MENU);
     scherm.Controls.Add(reversi);

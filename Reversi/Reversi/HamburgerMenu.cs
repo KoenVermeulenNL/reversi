@@ -8,7 +8,7 @@ class HamburgerMenu : Button {
     public HamburgerMenu() {
         this.MouseClick += changeLayout;
         this.Size = new Size(20, 20);
-        this.Image = Image.FromFile("HamburgerClosed.png");
+        this.Image = Image.FromFile("../../../HamburgerClosed.png");
         this.BackColor = Color.Transparent;
         this.FlatStyle = FlatStyle.Flat;
         this.FlatAppearance.BorderSize = 0;
@@ -29,13 +29,13 @@ class HamburgerMenu : Button {
 
     private void checkLayout() {
         if (Closed) {
-            this.Image = Image.FromFile("HamburgerClosed.png");
+            this.Image = Image.FromFile("../../../HamburgerClosed.png");
             this.BackColor = Color.Transparent;
             this.FlatAppearance.MouseOverBackColor = Color.Transparent;
             this.FlatAppearance.MouseDownBackColor = Color.Transparent;
             Closed = false;
         } else {
-            this.Image = Image.FromFile("HamurgerOpen.png");
+            this.Image = Image.FromFile("../../../HamurgerOpen.png");
             this.BackColor = Color.FromArgb(120, 27, 58, 133);
             this.FlatAppearance.MouseOverBackColor = Color.FromArgb(120, 27, 58, 133);
             this.FlatAppearance.MouseDownBackColor = Color.FromArgb(120, 27, 58, 133); 

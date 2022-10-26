@@ -7,7 +7,7 @@ class ToggleButton : Button{
     public ToggleButton(bool onOff) {
         this.MouseClick += changeLayout;
         this.AutoSize = true;
-        this.Image = Image.FromFile("toggle.png");
+        this.Image = Image.FromFile("../../../toggle.png");
         this.BackColor = Color.Transparent;
         this.FlatStyle = FlatStyle.Flat;
         this.FlatAppearance.BorderSize = 0;
@@ -23,10 +23,10 @@ class ToggleButton : Button{
     }
     private void checkLayout() {
         if (onOff) {
-            this.Image = Image.FromFile("toggle.png");
+            this.Image = Image.FromFile("../../../toggle.png");
             onOff = false;
         } else {
-            this.Image = Image.FromFile("toggle-outline.png");
+            this.Image = Image.FromFile("../../../toggle-outline.png");
             onOff = true;
         }
     }
