@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 int SCREEN_WIDTH = 600;
 int SCREEN_HEIGHT = 700;
@@ -10,6 +11,7 @@ int SCREEN_HEIGHT = 700;
 Form scherm = new Form();
 scherm.Text = "Reversi";
 scherm.ClientSize = new Size(SCREEN_WIDTH, SCREEN_HEIGHT);
+scherm.MinimumSize = new Size(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 int boardWidth = 400; 
 System.Media.SoundPlayer player = new System.Media.SoundPlayer();
@@ -29,6 +31,8 @@ int amountOfTurns = 0;
 double cellWidth = boardWidth/amountOfCells;
 double stoneRadius = (boardWidth/amountOfCells)/2;
 bool showViableLocation = true;
+bool MultiplayerBool = true;
+bool HamburgerBool = true;
 bool playingSound = true;
 
 int highscore = Convert.ToInt32(File.ReadAllText(@"highscore.txt"));
@@ -37,7 +41,9 @@ int currentPlayer = 0; // even = red odd = blue
 
 //UI Elements
 Button newGameBtn = new Button();
-newGameBtn.BackColor = Color.Transparent;
+newGameBtn.BackColor = Color.FromArgb(200, 27, 58, 133);
+newGameBtn.Location = new Point(0, 40);
+newGameBtn.Width = 89;
 newGameBtn.Text = "New Game";
 
 
@@ -46,29 +52,34 @@ int amountBlue = 0;
 
 Label blueStonesLabel = new Label();
 blueStonesLabel.Text = $"{amountBlue}";
-blueStonesLabel.Location = new Point(100, 410);
-// blueStonesLabel.Size = new Size(15, 20);
+blueStonesLabel.Location = new Point(100, 510);
+blueStonesLabel.ForeColor = Color.Blue;
 blueStonesLabel.AutoSize = true;
 blueStonesLabel.BackColor = Color.Transparent;
 Label redStonesLabel = new Label();
 redStonesLabel.Text = $"{amountRed}";
-redStonesLabel.Location = new Point(100, 440);
+redStonesLabel.ForeColor = Color.Red;
+redStonesLabel.Location = new Point(100, 540);
 redStonesLabel.AutoSize = true;
-// redStonesLabel.Size = new Size(20, 20);
 redStonesLabel.BackColor = Color.Transparent;
 
 Label PlayerStonesTextBlue = new Label();
 PlayerStonesTextBlue.Text = "Blue stones";
-PlayerStonesTextBlue.Location = new Point(120, 410);
+PlayerStonesTextBlue.Location = new Point(120, 510);
 PlayerStonesTextBlue.BackColor = Color.Transparent;
 Label PlayerStonesTextRed = new Label();
 PlayerStonesTextRed.Text = "Red stones";
-PlayerStonesTextRed.Location = new Point(120, 440);
+PlayerStonesTextRed.Location = new Point(120, 540);
 PlayerStonesTextRed.BackColor = Color.Transparent;
 Label CurrentPlayer = new Label();
 CurrentPlayer.BackColor = Color.Transparent;
 CurrentPlayer.Text = "Current Player:";
-CurrentPlayer.Location = new Point(300, 410);
+CurrentPlayer.Location = new Point(300, 510);
+
+Label HighscoreLabel = new Label();
+HighscoreLabel.Text = $"HighScore: {highscore}";
+HighscoreLabel.Location = new Point(300, 540);
+HighscoreLabel.BackColor = Color.Transparent;
 
 //FOR NOW: CHANGE IF YOU CHANGE THE amountOfCells
 int[,] squares = {}; // 0 = empty, 1 = red, 2 = blue
@@ -95,11 +106,11 @@ Graphics CurrentPlayerDrawer = Graphics.FromImage(CurrentPlayerBitmap);
 
 // create Label
 Label ImageBoxImage = new Label();
-ImageBoxImage.Location = new Point(100, 10);
+ImageBoxImage.Location = new Point(100, 100);
 
 Label CurrentPlayerLabel = new Label();
 CurrentPlayerLabel.BackColor = Color.Transparent;
-CurrentPlayerLabel.Location = new Point(400, 410);
+CurrentPlayerLabel.Location = new Point(400, 510);
 
 scherm.Controls.Add(ImageBoxImage);
 scherm.Controls.Add(CurrentPlayerLabel);
@@ -114,6 +125,22 @@ SETTINGS.AutoSize = true;
 SETTINGS.Font = LargeFont;
 SETTINGS.Location = new Point(150, 20);
 
+Label NewGameText = new Label();
+NewGameText.ForeColor = Color.FromArgb(30, 78, 199);
+NewGameText.BackColor = Color.Transparent;
+NewGameText.Text = "REVERSI";
+NewGameText.AutoSize = true;
+NewGameText.Font = LargeFont;
+NewGameText.Location = new Point(170, 20);
+
+HamburgerMenu hamburgerMenu = new HamburgerMenu();
+hamburgerMenu.Location = new Point(5, 10);
+
+Label HamburgerLabel = new Label();
+HamburgerLabel.Location = new Point(0, 0);
+HamburgerLabel.BackColor = Color.FromArgb(120, 27, 58, 133);
+HamburgerLabel.Size = new Size(90, scherm.Height);
+
 Label CheckViableLocationLabel = new Label();
 CheckViableLocationLabel.Font = new Font("Times New Roman", 20);
 CheckViableLocationLabel.AutoSize = true;
@@ -124,6 +151,17 @@ CheckViableLocationLabel.Text = "Show viable Locations";
 
 ToggleButton ViableLocation = new ToggleButton(showViableLocation);
 ViableLocation.Location = new Point(380, 95);
+
+Label MultiplayerLabel = new Label();
+MultiplayerLabel.Font = new Font("Times New Roman", 20);
+MultiplayerLabel.AutoSize = true;
+MultiplayerLabel.Location = new Point(122, 180);
+MultiplayerLabel.BackColor = Color.Transparent;
+MultiplayerLabel.Height = 46;
+MultiplayerLabel.Text = "Multiplayer";
+
+ToggleButton Multiplayer = new ToggleButton(MultiplayerBool);
+Multiplayer.Location = new Point(380, 170);
 
 // variabelen voor Difficulty:
 Button DifficultyMenuButton = new Button();
@@ -136,9 +174,9 @@ DifficultyMenuButton.Text = "Menu";
 Label DifficultyText = new Label();
 DifficultyText.ForeColor = Color.FromArgb(30, 78, 199);
 DifficultyText.BackColor = Color.Transparent;
-DifficultyText.Text = "Difficulty";
+DifficultyText.Text = "DIFFICULTY";
 DifficultyText.AutoSize = true;
-DifficultyText.Location = new Point(170, 20);
+DifficultyText.Location = new Point(140, 20);
 DifficultyText.Font = LargeFont;
 
 Button Easy = new Button();
@@ -161,6 +199,32 @@ Hard.BackColor = Color.Transparent;
 Hard.Size = new Size(260, 52);
 Hard.Location = new Point(170, 320);
 Hard.Text = "Hard Game: 10x10";
+
+// Atributes for Rules
+Label RulesText = new Label();
+RulesText.ForeColor = Color.FromArgb(30, 78, 199);
+RulesText.BackColor = Color.Transparent;
+RulesText.Text = "RULES";
+RulesText.AutoSize = true;
+RulesText.Location = new Point(190, 20);
+RulesText.Font = LargeFont;
+
+Label PlayingRules = new Label();
+PlayingRules.BackColor = Color.Transparent;
+PlayingRules.Size = new Size(400, 400);
+PlayingRules.MaximumSize = new Size(400, 400);
+PlayingRules.Location = new Point(100, 100);
+PlayingRules.Font = new Font("Times New Roman", 14);
+PlayingRules.Text =@"
+Each player places a stone of their color on the board.
+
+You may only put down the stones if it encloses an opponent's stone.
+
+After that, all the stones that are enclosed are turned over to the player's color.
+
+When there are no more possible moves, the game ends and the player with the most stones wins.
+
+The purple circles are places where a player can place their stones. You can turn this of in the settings";
 
 // Atributes for the menu
 Label MENU = new Label();
@@ -222,10 +286,22 @@ SoundButtonOn.Size = new Size(42, 42);
 SoundButtonOn.Location = new Point(SCREEN_WIDTH-45, SCREEN_HEIGHT-45);
 
 Button MenuButton = new Button();
-MenuButton.BackColor = Color.Transparent;
-MenuButton.Location = new Point(0, 20);
+MenuButton.BackColor = Color.FromArgb(200, 27, 58, 133);
+MenuButton.Width = 89;
+MenuButton.Location = new Point(0, 115);
 MenuButton.Text = "Menu";
 
+Button DifficultyInGame = new Button();
+DifficultyInGame.BackColor = Color.FromArgb(200, 27, 58, 133);
+DifficultyInGame.Width = 89;
+DifficultyInGame.Location = new Point(0, 90);
+DifficultyInGame.Text = "Difficulty";
+
+Button SettingsInGame = new Button(); 
+SettingsInGame.BackColor = Color.FromArgb(200, 27, 58, 133);
+SettingsInGame.Width = 89;
+SettingsInGame.Location = new Point(0, 65);
+SettingsInGame.Text = "Settings";
 
 SoundButtonOn.Click += StopSound;
 SoundButtonOff.Click += PlaySound;
@@ -312,7 +388,6 @@ void UpdateBoard() {
         }
     }
 
-
     amountRed = CountPlayer(1);
     amountBlue = CountPlayer(2);
 
@@ -334,18 +409,29 @@ void UpdateBoard() {
     if (amountOfTrueLocations==0) {
         if (amountOfTurns < highscore) {
             File.WriteAllText(@"highscore.txt", amountOfTurns.ToString());
+            highscore = Convert.ToInt32(File.ReadAllText(@"highscore.txt"));
         }
         if (amountBlue == amountRed) {
-            MessageBox.Show($"Its a tie!! \n with {amountOfTurns} turns");
+            MessageBox.Show($"Its a tie!! \nWith {amountOfTurns} turns");
             menu();
         }
         else if (amountBlue > amountRed) {
-            MessageBox.Show($"Blue wins!! \n with {amountOfTurns} turns");
+            MessageBox.Show($"Blue wins!! \nWith {amountOfTurns} turns");
             menu();
         } else {
-            MessageBox.Show($"Red wins!! \n with {amountOfTurns} turns");
+            MessageBox.Show($"Red wins!! \nWith {amountOfTurns} turns");
             menu();
         }
+
+        for (int i = 0; i < squares.GetLength(0); i++){
+            for (int j = 0; j < squares.GetLength(1); j++){
+                squares[i,j] = 0;
+            }
+        }
+        squares[(amountOfCells/2-1), (amountOfCells/2-1)] = squares[(amountOfCells/2), (amountOfCells/2)] = 1; //populate board with middle pieces, works for (almost) every board width
+        squares[(amountOfCells/2-1), (amountOfCells/2)] = squares[(amountOfCells/2), (amountOfCells/2 -1)] = 2; //populate board with middle pieces, works for (almost) every board width
+        currentPlayer = 0;
+        amountOfTurns = 0;
     }
 }
 
@@ -676,39 +762,83 @@ void change_size(object sender, EventArgs e) {
     Medium.Location = new Point(((scherm.Width-16)/2)-Medium.Width/2, 260);
     Hard.Location = new Point(((scherm.Width-16)/2)-Hard.Width/2, 320);
     DifficultyMenuButton.Location = new Point(((scherm.Width-16)/2)-DifficultyMenuButton.Width/2, 570);
-    ImageBoxImage.Location = new Point((scherm.Width/2)-ImageBoxImage.Width/2, 10);
-    blueStonesLabel.Location = new Point((scherm.Width/2)-ImageBoxImage.Width/2, ImageBoxImage.Height+15);
-    redStonesLabel.Location = new Point((scherm.Width/2)-ImageBoxImage.Width/2, ImageBoxImage.Height+blueStonesLabel.Height+15);
-    PlayerStonesTextBlue.Location = new Point((scherm.Width/2)-ImageBoxImage.Width/2+blueStonesLabel.Width+10, ImageBoxImage.Height+15);
-    PlayerStonesTextRed.Location = new Point((scherm.Width/2)-ImageBoxImage.Width/2+redStonesLabel.Width+10, ImageBoxImage.Height+blueStonesLabel.Height+15);
-    CurrentPlayerLabel.Location = new Point((scherm.Width/2)+ImageBoxImage.Width/2-CurrentPlayerLabel.Width, ImageBoxImage.Height+15); 
-    CurrentPlayer.Location = new Point((scherm.Width/2)+ImageBoxImage.Width/2-CurrentPlayerLabel.Width-CurrentPlayer.Width - 10, ImageBoxImage.Height+15); 
+    ImageBoxImage.Location = new Point((scherm.Width/2)-ImageBoxImage.Width/2, 100);
+    blueStonesLabel.Location = new Point((scherm.Width/2)-ImageBoxImage.Width/2, 100+ImageBoxImage.Height+15);
+    redStonesLabel.Location = new Point((scherm.Width/2)-ImageBoxImage.Width/2, 100+ImageBoxImage.Height+45);
+    PlayerStonesTextBlue.Location = new Point((scherm.Width/2)-ImageBoxImage.Width/2+blueStonesLabel.Width+10, 100+ImageBoxImage.Height+15);
+    PlayerStonesTextRed.Location = new Point((scherm.Width/2)-ImageBoxImage.Width/2+redStonesLabel.Width+10, 100+ImageBoxImage.Height+45);
+    CurrentPlayerLabel.Location = new Point((scherm.Width/2)+ImageBoxImage.Width/2-CurrentPlayerLabel.Width, 100+ImageBoxImage.Height+15); 
+    CurrentPlayer.Location = new Point((scherm.Width/2)+ImageBoxImage.Width/2-CurrentPlayerLabel.Width-CurrentPlayer.Width - 10, 100+ImageBoxImage.Height+15); 
+    HighscoreLabel.Location = new Point((scherm.Width/2)+ImageBoxImage.Width/2-CurrentPlayerLabel.Width-CurrentPlayer.Width - 10, 100+ImageBoxImage.Height+45); 
     Continue.Location = new Point(((scherm.Width-16)/2)-Continue.Width/2, 510);
     settings.Location = new Point(((scherm.Width-16)/2)+5, 360);
     SETTINGS.Location = new Point(((scherm.Width-16)/2)-SETTINGS.Width/2, 20);
+    NewGameText.Location = new Point(((scherm.Width)/2)-NewGameText.Width/2, 20);
     CheckViableLocationLabel.Location = new Point(((scherm.Width-16)/2)-(CheckViableLocationLabel.Width+ViableLocation.Width)/2, 100);
+    MultiplayerLabel.Location = new Point(((scherm.Width-16)/2)-(CheckViableLocationLabel.Width+ViableLocation.Width)/2, 180);
     ViableLocation.Location = new Point(((scherm.Width-16)/2)-(CheckViableLocationLabel.Width+ViableLocation.Width)/2+CheckViableLocationLabel.Width, 95);
+    Multiplayer.Location = new Point(((scherm.Width-16)/2)-(CheckViableLocationLabel.Width+ViableLocation.Width)/2+CheckViableLocationLabel.Width, 170);
+    RulesText.Location = new Point(((scherm.Width-16)/2)-MENU.Width/2, 20);
+    HamburgerLabel.Size = new Size(90, scherm.Height);
 }
 
+List<Point> makeListOfViableLocations() {
+    List<Point> ListOfViableLocations = new List<Point>();
+
+    for (int col=0; col<amountOfCells; col++) {
+        for (int row=0; row<amountOfCells; row++) {
+            if (CheckIfViableLocation(col, row)) {
+                ListOfViableLocations.Add(new Point(col, row));
+            }
+        }
+    }
+
+    return ListOfViableLocations;
+}
 
 ImageBoxImage.MouseClick += ImageBoxImage_MouseClick;
 void ImageBoxImage_MouseClick(object sender, MouseEventArgs mea) {
     //Bij Klik update board
+    int cellX, cellY;
+    Random rdn = new Random();
 
     //Determin which cell
-    int cellX = PixelToCell(mea.X);
-    int cellY = PixelToCell(mea.Y);
-    
-    if (CheckIfViableLocation(cellX, cellY)) {
-        GoodplayPlayer.Play();
-        amountOfTurns++;
+    if (MultiplayerBool) {
+        cellX = PixelToCell(mea.X);
+        cellY = PixelToCell(mea.Y);
+        if (CheckIfViableLocation(cellX, cellY)) {
+            GoodplayPlayer.Play();
+            amountOfTurns++;
+        } else {
+            BadplayPlayer.Play();
+        }
     } else {
-        BadplayPlayer.Play();
+        cellX = PixelToCell(mea.X);
+        cellY = PixelToCell(mea.Y);
+
+        if (CheckIfViableLocation(cellX, cellY)) {
+            GoodplayPlayer.Play();
+            CreateStone(cellX, cellY);
+            UpdateBoard();
+
+            List<Point> ViableLocations = makeListOfViableLocations();
+            int Index = rdn.Next(ViableLocations.Count);
+            Point randomPoint = ViableLocations[Index];
+            cellX = randomPoint.X;
+            cellY = randomPoint.Y;
+
+            amountOfTurns++;
+            amountOfTurns++;
+            GoodplayPlayer.Play();
+            CreateStone(cellX, cellY);
+
+            UpdateBoard();
+        }
+
     }
 
-    CreateStone(cellX, cellY);
 
-    
+    CreateStone(cellX, cellY);
     UpdateBoard();
 }
 
@@ -745,28 +875,7 @@ void menu() {
         playingSound = true;
         player.PlayLooping();
     }
-    try {
-        scherm.Controls.Remove(ImageBoxImage);
-        scherm.Controls.Remove(newGameBtn);
-        scherm.Controls.Remove(blueStonesLabel);
-        scherm.Controls.Remove(redStonesLabel);
-        scherm.Controls.Remove(PlayerStonesTextBlue);
-        scherm.Controls.Remove(PlayerStonesTextRed);
-        scherm.Controls.Remove(MenuButton);
-        scherm.Controls.Remove(CurrentPlayer);
-        scherm.Controls.Remove(CurrentPlayerLabel);
-        scherm.Controls.Remove(DifficultyMenuButton);
-        scherm.Controls.Remove(DifficultyText);
-        scherm.Controls.Remove(Easy);
-        scherm.Controls.Remove(Medium);
-        scherm.Controls.Remove(Hard);
-        scherm.Controls.Remove(ViableLocation);
-        scherm.Controls.Remove(SETTINGS);
-        scherm.Controls.Remove(CheckViableLocationLabel);
-
-    } catch {
-        // pass
-    }
+    DeleteAllWidgets();
 
     // scherm.BackColor = Color.FromArgb(32, 32, 32);
     scherm.BackgroundImage = Image.FromFile("background.png");
@@ -805,19 +914,17 @@ void DifficultyClickButton(object sender, EventArgs e) {
 
 Continue.MouseClick += continueGame;
 difficulty.MouseClick += Difficulty;
+DifficultyInGame.MouseClick += Difficulty;
 void Difficulty(object sender, EventArgs e) {
-    try{
-        scherm.Controls.Remove(MENU);
-        scherm.Controls.Remove(reversi);
-        scherm.Controls.Remove(newGame);    
-        scherm.Controls.Remove(rules);
-        scherm.Controls.Remove(SoundButtonOn);
-        scherm.Controls.Remove(difficulty);
-        scherm.Controls.Remove(settings);
-        scherm.Controls.Remove(ViableLocation);
-        scherm.Controls.Remove(SETTINGS);
-        scherm.Controls.Remove(CheckViableLocationLabel);
-    } catch{}
+    showDifficulty();
+}
+
+void showDifficulty() {
+    if (!playingSound) {
+        playingSound = true;
+        player.PlayLooping();
+    }
+    DeleteAllWidgets();
 
     scherm.Controls.Add(DifficultyMenuButton);
     scherm.Controls.Add(DifficultyText);
@@ -838,12 +945,48 @@ void changeViableLocationSettings(object sender, EventArgs e) {
     } else {
         showViableLocation = true;
     }
+}
 
-    Debug.WriteLine(showViableLocation);
+Multiplayer.MouseClick += changeMultiplayer;
+void changeMultiplayer(object sender, EventArgs e) {
+    if (MultiplayerBool) {
+        MultiplayerBool = false;
+    } else {
+        MultiplayerBool = true;
+    }
+}
+
+hamburgerMenu.MouseClick += showHamburgerMenu;
+void showHamburgerMenu(object sender, EventArgs e) {
+    if (HamburgerBool) {
+        HamburgerBool = false;
+        hamburgerMenu.Location = new Point(50, 10);
+        scherm.Controls.Add(newGameBtn);
+        scherm.Controls.Add(MenuButton);
+        scherm.Controls.Add(DifficultyInGame);
+        scherm.Controls.Add(SettingsInGame);
+        scherm.Controls.Add(HamburgerLabel);
+    } else {
+        HamburgerBool = true;
+        hamburgerMenu.Location = new Point(10, 10);
+        scherm.Controls.Remove(newGameBtn);
+        scherm.Controls.Remove(MenuButton);
+        scherm.Controls.Remove(DifficultyInGame);
+        scherm.Controls.Remove(SettingsInGame);
+        scherm.Controls.Remove(HamburgerLabel);
+    }
 }
 
 void DeleteAllWidgets() {
     try {
+        scherm.Controls.Remove(ImageBoxImage);
+        scherm.Controls.Remove(newGameBtn);
+        scherm.Controls.Remove(blueStonesLabel);
+        scherm.Controls.Remove(redStonesLabel);
+        scherm.Controls.Remove(PlayerStonesTextBlue);
+        scherm.Controls.Remove(PlayerStonesTextRed); 
+        scherm.Controls.Remove(CurrentPlayer);
+        scherm.Controls.Remove(CurrentPlayerLabel);
         scherm.Controls.Remove(MENU);
         scherm.Controls.Remove(reversi);
         scherm.Controls.Remove(newGame);    
@@ -860,46 +1003,82 @@ void DeleteAllWidgets() {
         scherm.Controls.Remove(ViableLocation);
         scherm.Controls.Remove(SETTINGS);
         scherm.Controls.Remove(CheckViableLocationLabel);
+        scherm.Controls.Remove(RulesText);
+        scherm.Controls.Remove(PlayingRules);
+        scherm.Controls.Remove(NewGameText);
+        scherm.Controls.Remove(hamburgerMenu);
+        scherm.Controls.Remove(HamburgerLabel);
+        scherm.Controls.Remove(newGameBtn);
+        scherm.Controls.Remove(MenuButton);
+        scherm.Controls.Remove(DifficultyInGame);
+        scherm.Controls.Remove(HamburgerLabel);
+        scherm.Controls.Remove(SettingsInGame);
+        scherm.Controls.Remove(HighscoreLabel);
+        scherm.Controls.Remove(Multiplayer);
+        scherm.Controls.Remove(MultiplayerLabel);
     } catch{}
 }
 
 void Rules(object sender, EventArgs e) {
+    if (!playingSound) {
+        playingSound = true;
+        player.PlayLooping();
+    }
     DeleteAllWidgets();
     scherm.Controls.Add(DifficultyMenuButton);
     scherm.Controls.Add(Continue);
+    scherm.Controls.Add(RulesText);
+    scherm.Controls.Add(PlayingRules);
 }
 
 rules.MouseClick += Rules;
 DifficultyMenuButton.MouseClick += BackToMenu;
 settings.MouseClick += Settings;
+SettingsInGame.MouseClick += Settings;
 void Settings(object sender, EventArgs e) {
+    if (!playingSound) {
+        playingSound = true;
+        player.PlayLooping();
+    }
     DeleteAllWidgets();
     scherm.Controls.Add(DifficultyMenuButton);
     scherm.Controls.Add(Continue);
     scherm.Controls.Add(ViableLocation);
     scherm.Controls.Add(SETTINGS);
     scherm.Controls.Add(CheckViableLocationLabel);
+    scherm.Controls.Add(Multiplayer);
+    scherm.Controls.Add(MultiplayerLabel);
 }
 
 void continueGame(object sender, EventArgs e) {
     DeleteAllWidgets();
+    player.Stop();
+    playingSound = false;
+    HamburgerBool = true;
+    hamburgerMenu.Location = new Point(10, 10);
+    hamburgerMenu.ForceClose();
 
     scherm.Controls.Add(ImageBoxImage);
     scherm.Controls.Add(CurrentPlayerLabel);
-    scherm.Controls.Add(newGameBtn);
     scherm.Controls.Add(blueStonesLabel);
     scherm.Controls.Add(redStonesLabel);
     scherm.Controls.Add(PlayerStonesTextBlue);
     scherm.Controls.Add(PlayerStonesTextRed);
-    scherm.Controls.Add(MenuButton);
     scherm.Controls.Add(CurrentPlayer);
+    scherm.Controls.Add(NewGameText);
+    scherm.Controls.Add(hamburgerMenu);
+    scherm.Controls.Add(HighscoreLabel);
 
     UpdateBoard();    
 }
 
 void startGame() {
+    amountOfTurns = 0;
     player.Stop();
     playingSound = false;
+    HamburgerBool = true;
+    hamburgerMenu.Location = new Point(10, 10);
+    hamburgerMenu.ForceClose();
 
     for (int i = 0; i < squares.GetLength(0); i++)
     {
@@ -916,13 +1095,16 @@ void startGame() {
 
     scherm.Controls.Add(ImageBoxImage);
     scherm.Controls.Add(CurrentPlayerLabel);
-    scherm.Controls.Add(newGameBtn);
+    
     scherm.Controls.Add(blueStonesLabel);
     scherm.Controls.Add(redStonesLabel);
     scherm.Controls.Add(PlayerStonesTextBlue);
     scherm.Controls.Add(PlayerStonesTextRed);
-    scherm.Controls.Add(MenuButton);
+    
     scherm.Controls.Add(CurrentPlayer);
+    scherm.Controls.Add(NewGameText);
+    scherm.Controls.Add(hamburgerMenu);
+    scherm.Controls.Add(HighscoreLabel);
 
     UpdateBoard();
 }

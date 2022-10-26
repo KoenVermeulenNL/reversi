@@ -19,13 +19,7 @@ class ToggleButton : Button{
     }
 
     private void changeLayout(object sender, EventArgs e) {
-        if (onOff) {
-            this.Image = Image.FromFile("toggle.png");
-            onOff = false;
-        } else {
-            this.Image = Image.FromFile("toggle-outline.png");
-            onOff = true;
-        }
+        checkLayout();
     }
     private void checkLayout() {
         if (onOff) {
