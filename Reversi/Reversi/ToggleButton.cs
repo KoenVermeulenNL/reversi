@@ -5,6 +5,7 @@ class ToggleButton : Button{
     bool onOff = true;
 
     public ToggleButton(bool onOff) {
+        // sets initial variables
         this.MouseClick += changeLayout;
         this.AutoSize = true;
         this.Image = Image.FromFile("../../../toggle.png");
@@ -22,10 +23,11 @@ class ToggleButton : Button{
         checkLayout();
     }
     private void checkLayout() {
+        // if the button is on show a full toggle
         if (onOff) {
             this.Image = Image.FromFile("../../../toggle.png");
             onOff = false;
-        } else {
+        } else { // if its off show only it's outline
             this.Image = Image.FromFile("../../../toggle-outline.png");
             onOff = true;
         }

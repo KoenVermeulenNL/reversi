@@ -5,6 +5,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Collections.Generic;
 
+// initialize screen hight and width
 int SCREEN_WIDTH = 600;
 int SCREEN_HEIGHT = 700;
 
@@ -13,7 +14,10 @@ scherm.Text = "Reversi";
 scherm.ClientSize = new Size(SCREEN_WIDTH, SCREEN_HEIGHT);
 scherm.MinimumSize = new Size(SCREEN_WIDTH, SCREEN_HEIGHT);
 
+// the width of the board itself
 int boardWidth = 400; 
+
+// the three soundplayer for backgroundmusic, if you place a wrong stone and if you place a good stone
 System.Media.SoundPlayer player = new System.Media.SoundPlayer();
 player.SoundLocation = "../../../backgroundmusic.wav";
 Debug.WriteLine(Environment.CurrentDirectory);
@@ -31,14 +35,20 @@ int amountOfTurns = 0;
 
 double cellWidth = boardWidth/amountOfCells;
 double stoneRadius = (boardWidth/amountOfCells)/2;
+
+// Booleans for self made buttons
 bool showViableLocation = true;
 bool MultiplayerBool = true;
 bool HamburgerBool = true;
 bool playingSound = true;
 
+// read the highscore from the txt file
 int highscore = Convert.ToInt32(File.ReadAllText(@"../../../highscore.txt"));
 
 int currentPlayer = 0; // even = red odd = blue
+
+int amountRed = 0;
+int amountBlue = 0;
 
 //UI Elements
 Button newGameBtn = new Button();
@@ -47,10 +57,7 @@ newGameBtn.Location = new Point(0, 40);
 newGameBtn.Width = 89;
 newGameBtn.Text = "New Game";
 
-
-int amountRed = 0;
-int amountBlue = 0;
-
+// the labels in the game itself
 Label blueStonesLabel = new Label();
 blueStonesLabel.Text = $"{amountBlue}";
 blueStonesLabel.Location = new Point(100, 510);
@@ -94,21 +101,23 @@ void ResizeArray<T>(ref T[,] original, int newCoNum, int newRoNum){
         Array.Copy(original, co * columnCount, newArray, co * columnCount2, columnCount);
     original = newArray;
 }
-ResizeArray(ref squares, amountOfCells, amountOfCells); //Resize 2D array to be used for every board width
+ResizeArray(ref squares, amountOfCells, amountOfCells); // Resize 2D array to be used for every board width
 
-squares[(amountOfCells/2-1), (amountOfCells/2-1)] = squares[(amountOfCells/2), (amountOfCells/2)] = 1; //populate board with middle pieces, works for (almost) every board width
-squares[(amountOfCells/2-1), (amountOfCells/2)] = squares[(amountOfCells/2), (amountOfCells/2 -1)] = 2; //populate board with middle pieces, works for (almost) every board width
+// populate board with middle pieces, works for (almost) every board width
+squares[(amountOfCells/2-1), (amountOfCells/2-1)] = squares[(amountOfCells/2), (amountOfCells/2)] = 1; 
+squares[(amountOfCells/2-1), (amountOfCells/2)] = squares[(amountOfCells/2), (amountOfCells/2 -1)] = 2;
 
-// Create Image Box
+// Create Bitmaps and graphics to draw
 Bitmap ImageBoxDrawing = new Bitmap(boardWidth, boardWidth);
 Bitmap CurrentPlayerBitmap = new Bitmap(30, 30);
 Graphics ImageBoxDrawer = Graphics.FromImage(ImageBoxDrawing);
 Graphics CurrentPlayerDrawer = Graphics.FromImage(CurrentPlayerBitmap);
 
-// create Label
+// create Label for the board
 Label ImageBoxImage = new Label();
 ImageBoxImage.Location = new Point(100, 100);
 
+// create label for the current player
 Label CurrentPlayerLabel = new Label();
 CurrentPlayerLabel.BackColor = Color.Transparent;
 CurrentPlayerLabel.Location = new Point(400, 510);
@@ -116,8 +125,20 @@ CurrentPlayerLabel.Location = new Point(400, 510);
 scherm.Controls.Add(ImageBoxImage);
 scherm.Controls.Add(CurrentPlayerLabel);
 
+// The self made hamburger button (in HamburgerMenu.cs)
+HamburgerMenu hamburgerMenu = new HamburgerMenu();
+hamburgerMenu.Location = new Point(5, 10);
+
+// the label which the hamburger button needs to open
+Label HamburgerLabel = new Label();
+HamburgerLabel.Location = new Point(0, 0);
+HamburgerLabel.BackColor = Color.FromArgb(120, 27, 58, 133);
+HamburgerLabel.Size = new Size(90, scherm.Height);
+
 Font LargeFont = new Font("Times New Roman", 44);
-// variabelen voor settings
+Font ButtonFont = new Font("Times new Roman", 20);;
+
+// Labels and Buttons for settings
 Label SETTINGS = new Label();
 SETTINGS.ForeColor = Color.FromArgb(30, 78, 199);
 SETTINGS.BackColor = Color.Transparent;
@@ -134,27 +155,20 @@ NewGameText.AutoSize = true;
 NewGameText.Font = LargeFont;
 NewGameText.Location = new Point(170, 20);
 
-HamburgerMenu hamburgerMenu = new HamburgerMenu();
-hamburgerMenu.Location = new Point(5, 10);
-
-Label HamburgerLabel = new Label();
-HamburgerLabel.Location = new Point(0, 0);
-HamburgerLabel.BackColor = Color.FromArgb(120, 27, 58, 133);
-HamburgerLabel.Size = new Size(90, scherm.Height);
-
 Label CheckViableLocationLabel = new Label();
-CheckViableLocationLabel.Font = new Font("Times New Roman", 20);
+CheckViableLocationLabel.Font = ButtonFont;
 CheckViableLocationLabel.AutoSize = true;
 CheckViableLocationLabel.Location = new Point(122, 100);
 CheckViableLocationLabel.BackColor = Color.Transparent;
 CheckViableLocationLabel.Height = 46;
 CheckViableLocationLabel.Text = "Show viable Locations";
 
+// The self made ToggleButton (made in ToggleButton.cs)
 ToggleButton ViableLocation = new ToggleButton(showViableLocation);
 ViableLocation.Location = new Point(380, 95);
 
 Label MultiplayerLabel = new Label();
-MultiplayerLabel.Font = new Font("Times New Roman", 20);
+MultiplayerLabel.Font = ButtonFont;
 MultiplayerLabel.AutoSize = true;
 MultiplayerLabel.Location = new Point(122, 180);
 MultiplayerLabel.BackColor = Color.Transparent;
@@ -167,7 +181,7 @@ Multiplayer.Location = new Point(380, 170);
 // variabelen voor Difficulty:
 Button DifficultyMenuButton = new Button();
 DifficultyMenuButton.Font = new Font("Times New Roman", 25);
-DifficultyMenuButton.BackColor = Color.Transparent;
+DifficultyMenuButton.BackColor = Color.FromArgb(120, 93, 135, 184);
 DifficultyMenuButton.Size = new Size(182, 52);
 DifficultyMenuButton.Location = new Point(209, 570);
 DifficultyMenuButton.Text = "Menu";
@@ -181,21 +195,21 @@ DifficultyText.Location = new Point(140, 20);
 DifficultyText.Font = LargeFont;
 
 Button Easy = new Button();
-Easy.Font = new Font("Times New Roman", 20);
+Easy.Font = ButtonFont;
 Easy.BackColor = Color.Transparent;
 Easy.Size = new Size(260, 52);
 Easy.Location = new Point(170, 200);
 Easy.Text = "Easy Game: 6x6";
 
 Button Medium = new Button();
-Medium.Font = new Font("Times New Roman", 20);
+Medium.Font = ButtonFont;
 Medium.BackColor = Color.Transparent;
 Medium.Size = new Size(260, 52);
 Medium.Location = new Point(170, 260);
 Medium.Text = "Medium Game: 8x8";
 
 Button Hard = new Button();
-Hard.Font = new Font("Times New Roman", 20);
+Hard.Font = ButtonFont;
 Hard.BackColor = Color.Transparent;
 Hard.Size = new Size(260, 52);
 Hard.Location = new Point(170, 320);
@@ -216,7 +230,7 @@ PlayingRules.Size = new Size(400, 400);
 PlayingRules.MaximumSize = new Size(400, 400);
 PlayingRules.Location = new Point(100, 100);
 PlayingRules.Font = new Font("Times New Roman", 14);
-PlayingRules.Text =@"
+PlayingRules.Text = @"
 Each player places a stone of their color on the board.
 
 You may only put down the stones if it encloses an opponent's stone.
@@ -229,45 +243,45 @@ The purple circles are places where a player can place their stones. You can tur
 
 // Atributes for the menu
 Label MENU = new Label();
-MENU.ForeColor = Color.FromArgb(30, 78, 199);
+MENU.ForeColor = Color.Black;
 MENU.BackColor = Color.Transparent;
 MENU.Text = "MENU";
 MENU.Size = new Size(200,70);
 MENU.Location = new Point(200, 20);
 MENU.Font = LargeFont;
-Font mediumFont = new Font("Times New Roman", 18);
+
 Label reversi = new Label();
 reversi.Text = "Reversi";
-reversi.ForeColor = Color.FromArgb(30, 78, 199);
+reversi.ForeColor = Color.Black;
 reversi.BackColor = Color.Transparent;
 reversi.Location = new Point(250, 100);
-reversi.Font = mediumFont;
+reversi.Font = new Font("Times New Roman", 18);
 reversi.Size = new Size(100, 50);
 
 Button rules = new Button();
 rules.Font = new Font("Times New Roman", 25);
-rules.BackColor = Color.Transparent;
+rules.BackColor = Color.FromArgb(120, 93, 135, 184);
 rules.Size = new Size(182, 52);
 rules.Location = new Point(((scherm.Width-16)/2)+5, 300);
 rules.Text = " Rules ";
 
 Button difficulty = new Button();
 difficulty.Font = new Font("Times New Roman", 25);
-difficulty.BackColor = Color.Transparent;
+difficulty.BackColor = Color.FromArgb(120, 93, 135, 184);
 difficulty.Size = new Size(182, 52);
 difficulty.Location = new Point(108, 360);
 difficulty.Text = "Difficulty";
 
 Button Continue = new Button();
 Continue.Font = new Font("Times New Roman", 25);
-Continue.BackColor = Color.Transparent;
+Continue.BackColor = Color.FromArgb(120, 93, 135, 184);
 Continue.Size = new Size(182, 52);
 Continue.Location = new Point(((scherm.Width-16)/2)-Continue.Width/2, 510);
 Continue.Text = "Continue";
 
 Button settings = new Button();
 settings.Font = new Font("Times New Roman", 25);
-settings.BackColor = Color.Transparent;
+settings.BackColor = Color.FromArgb(120, 93, 135, 184);
 settings.Size = new Size(182, 52);
 settings.Location = new Point(((scherm.Width-16)/2)+5, 360);
 settings.Text = "Settings";
@@ -307,10 +321,9 @@ SettingsInGame.Text = "Settings";
 SoundButtonOn.Click += StopSound;
 SoundButtonOff.Click += PlaySound;
 
-
 Button newGame = new Button();
 newGame.Font = new Font("Times New Roman", 25);
-newGame.BackColor = Color.Transparent;
+newGame.BackColor = Color.FromArgb(120, 93, 135, 184);
 newGame.Size = new Size(182, 52);
 newGame.Location = new Point(108, 300);
 newGame.Text = "New game";
@@ -327,7 +340,7 @@ ImageBoxImage.Size = new Size(boardWidth, boardWidth);
 CurrentPlayerLabel.Size = new Size(30, 30);
 
 CurrentPlayerLabel.Image = CurrentPlayerBitmap;
-ImageBoxImage.BackColor = Color.White;
+ImageBoxImage.BackColor = Color.Transparent;
 ImageBoxImage.Image = ImageBoxDrawing;
 
 int GetPlayer(){
@@ -335,13 +348,15 @@ int GetPlayer(){
 }
 
 void createBoard(){
-
+    // Nested for loop which makes a square of squares
     for (int i = 0; i < amountOfCells; i++) {
         for (int j = 0; j< amountOfCells;j++) {
-            if (i%2==1) {
+            if (i%2==1) {// If the rows are even
+                // to oscilate between gray and white squares
                 if (j%2==0) ImageBoxDrawer.FillRectangle(Brushes.LightGray, i*(int)cellWidth, j*(int)cellWidth, (int)cellWidth, (int)cellWidth);
                 else ImageBoxDrawer.FillRectangle(Brushes.White, i*(int)cellWidth, j*(int)cellWidth, (int)cellWidth, (int)cellWidth);
-            } else if (i%2==0) {
+            } else if (i%2==0) { // If the rows are odd
+                // to oscilate between gray and white squares for a chessboard like pattern
                 if (j%2==0) ImageBoxDrawer.FillRectangle(Brushes.White, i*(int)cellWidth, j*(int)cellWidth, (int)cellWidth, (int)cellWidth);
                 else ImageBoxDrawer.FillRectangle(Brushes.LightGray, i*(int)cellWidth, j*(int)cellWidth, (int)cellWidth, (int)cellWidth);
             }
@@ -349,29 +364,24 @@ void createBoard(){
         }
     }
 
+    // Makes the board more defined
     for (int i = 0; i < amountOfCells; i++) {
         for (int j = 0; j< amountOfCells;j++) {
             ImageBoxDrawer.DrawRectangle(Pens.Black, i*(int)cellWidth, j*(int)cellWidth, (int)cellWidth, (int)cellWidth);
         }
     }
 
+    // Draws a big rectangle to make the board prettier because the edges aren't drawn
     ImageBoxDrawer.DrawRectangle(Pens.Black, 0, 0, ImageBoxImage.Width-1, ImageBoxImage.Height-1);
 }
 
 void UpdateBoard() {
-    //logic
-
-
-    //Dag Hugooo
-    //Niet al te veel bijzonder werk, gebruik deze functie: CreateStone(CELLX, CELLY);, MET DE PIXEL TO CELL FUNCTIE
-    //en gebruik squares[,]
-    //Voor de aanduiding welke moves mogelijk zijn kun je deze functie gebruiken: CheckIfViableLocation(CELLX, CELLY)
-    //succes
-
+    // Draws a whole board
     createBoard();
 
     int amountOfTrueLocations = 0;
-
+    
+    // loop through every square, if the square contains a 1 (for red) or a 2 (for blue) draw a circle at that posisition
     for (int col = 0; col < squares.GetLength(1); col++) {
         for (int row = 0; row < squares.GetLength(0); row++) {
             if (squares[col, row] == 1) {
@@ -380,9 +390,12 @@ void UpdateBoard() {
                 ImageBoxDrawer.FillEllipse(Brushes.Blue, (row*(int)cellWidth), (col*(int)cellWidth), (int)cellWidth-1, (int)cellWidth-1);
             }
 
+            // every time the board gets updated it checks all the locations
             if (CheckIfViableLocation(row, col)) {
                 amountOfTrueLocations++;
             }
+
+            // draw a purple circle if the square is viable and if the user choose to draw them
             if (showViableLocation && CheckIfViableLocation(row,col)) {
                 ImageBoxDrawer.DrawEllipse(Pens.Purple, (row*(int)cellWidth), (col*(int)cellWidth), (int)cellWidth-1, (int)cellWidth-1);
             }
@@ -395,6 +408,7 @@ void UpdateBoard() {
     redStonesLabel.Text = $"{amountRed}";
     blueStonesLabel.Text = $"{amountBlue}";
 
+    // To show which turn it is
     switch (GetPlayer()) {
         case 1:
             CurrentPlayerDrawer.FillEllipse(Brushes.Red, 0, 0, 30, 30);
@@ -407,23 +421,30 @@ void UpdateBoard() {
     ImageBoxImage.Invalidate();
     CurrentPlayerLabel.Invalidate();
     
+    // if there are no more viable turns
     if (amountOfTrueLocations==0) {
         if (amountOfTurns < highscore) {
             File.WriteAllText(@"../../../highscore.txt", amountOfTurns.ToString());
+            // write the highscore to the text file
             highscore = Convert.ToInt32(File.ReadAllText(@"../../../highscore.txt"));
         }
+        // for tie
         if (amountBlue == amountRed) {
             MessageBox.Show($"Its a tie!! \nWith {amountOfTurns} turns");
             menu();
         }
+        // for a win from blue
         else if (amountBlue > amountRed) {
             MessageBox.Show($"Blue wins!! \nWith {amountOfTurns} turns");
             menu();
-        } else {
+        } 
+        // for a win from red
+        else {
             MessageBox.Show($"Red wins!! \nWith {amountOfTurns} turns");
             menu();
         }
 
+        // If you win it creates a new board, populates it again, resets the currentplayer and the amount of turns
         for (int i = 0; i < squares.GetLength(0); i++){
             for (int j = 0; j < squares.GetLength(1); j++){
                 squares[i,j] = 0;
@@ -439,7 +460,6 @@ void UpdateBoard() {
 int CheckCaptured(int[] rowList, int columnPosition, int cellX, int cellY){
     //Expected input: array of entire row converted from any direction to horizontal. 
     
-
     if(rowList.Length != amountOfCells){
         MessageBox.Show("error", "rowList.Length is not the same length as the board width");
         return 0; //0 means not possible
@@ -463,13 +483,6 @@ int CheckCaptured(int[] rowList, int columnPosition, int cellX, int cellY){
 }
 
 int CheckCapturedLine(int[] rowList, int columnPosition, int iTER, int cellX, int cellY){
-    /*if(cellX == 1 && cellY == 4){
-    Debug.WriteLine(String.Join(";", rowList));
-    Debug.WriteLine(squares[cellY, cellX]);
-    Debug.WriteLine(squares[cellY, cellX + 1]);
-    Debug.WriteLine(squares[cellY, cellX + 2]);
-    }*/
-
     for (int zeroIndex = 1; zeroIndex <= iTER; zeroIndex++) 
     {
         //zeroIndex = 1, because it doesn't have to check its own position
@@ -530,20 +543,6 @@ int[] GetVerticalRow(int cellX){
         currentColumn[i] = squares[i, cellX]; //first row, then column
     }
     return currentColumn;
-}
-
-int CheckDiagonal(int cellX, int cellY){
-    //4 directions
-    int diagonalLTR = CheckDiagonalLeftToRight(cellX, cellY);
-    //int diagonalRTL = CheckDiagonal(RightToLeft(cellX, cellY);
-    
-    if(diagonalLTR != 0){
-        return diagonalLTR;
-    }
-    /*if(diagonalRTL != 0){
-        return diagonalRTL;
-    }*/
-    return 0; //0 means not possible
 }
 
 int CheckDiagonalLeftToRight(int cellX, int cellY){
@@ -747,10 +746,10 @@ int PixelToCell(int mousePixel) {
     return (int)Math.Floor(mousePixel / cellWidth);
 }
 
+// this is an event that checks if you change the size of the screen
 scherm.ClientSizeChanged += change_size;
 void change_size(object sender, EventArgs e) {
-    Debug.WriteLine(scherm.Width);
-    Debug.WriteLine(scherm.Height);
+    // These change the location of all the attributes relative to the screen height and width
     SoundButtonOff.Location = new Point(scherm.Width-45-16, scherm.Height-45-39);
     SoundButtonOn.Location = new Point(scherm.Width-45-16, scherm.Height-45-39);
     MENU.Location = new Point(((scherm.Width-16)/2)-MENU.Width/2, 20);
@@ -780,9 +779,11 @@ void change_size(object sender, EventArgs e) {
     ViableLocation.Location = new Point(((scherm.Width-16)/2)-(CheckViableLocationLabel.Width+ViableLocation.Width)/2+CheckViableLocationLabel.Width, 95);
     Multiplayer.Location = new Point(((scherm.Width-16)/2)-(CheckViableLocationLabel.Width+ViableLocation.Width)/2+CheckViableLocationLabel.Width, 170);
     RulesText.Location = new Point(((scherm.Width-16)/2)-MENU.Width/2, 20);
+    PlayingRules.Location = new Point(((scherm.Width-16)/2)-PlayingRules.Width/2, 100);
     HamburgerLabel.Size = new Size(90, scherm.Height);
 }
 
+// makes a list of all the viable locations so that we can choose a random position
 List<Point> makeListOfViableLocations() {
     List<Point> ListOfViableLocations = new List<Point>();
 
@@ -797,8 +798,8 @@ List<Point> makeListOfViableLocations() {
     return ListOfViableLocations;
 }
 
-void wait(int ms)
-{
+// this is a function that waits a program without stopping the whole thread
+void wait(int ms){
     Timer timer = new Timer();
     timer.Interval = ms;
     timer.Enabled = true;
@@ -813,14 +814,15 @@ void wait(int ms)
     while(timer.Enabled) Application.DoEvents();
 }
 
+// If you click on the board
 ImageBoxImage.MouseClick += ImageBoxImage_MouseClick;
 void ImageBoxImage_MouseClick(object sender, MouseEventArgs mea) {
-    //Bij Klik update board
     int cellX, cellY;
     Random rdn = new Random();
 
-    //Determin which cell
+    // if you want to play multiplayer
     if (MultiplayerBool) {
+        // This checks for the mouse click, make it a cell and then plays the board.
         cellX = PixelToCell(mea.X);
         cellY = PixelToCell(mea.Y);
         if (CheckIfViableLocation(cellX, cellY)) {
@@ -833,27 +835,34 @@ void ImageBoxImage_MouseClick(object sender, MouseEventArgs mea) {
         cellX = PixelToCell(mea.X);
         cellY = PixelToCell(mea.Y);
 
+        // only if you click on a viable location 
         if (CheckIfViableLocation(cellX, cellY)) {
+            // now its the computers turn so you don't want to see the viable locations of the computer
             showViableLocation = false;
             GoodplayPlayer.Play();
+
+            // it creates a stone for the current player
             CreateStone(cellX, cellY);
             UpdateBoard();
 
+            // makes a list of the viable locations to choose random from
             List<Point> ViableLocations = makeListOfViableLocations();
             int Index = rdn.Next(ViableLocations.Count);
             Point randomPoint = ViableLocations[Index];
             cellX = randomPoint.X;
             cellY = randomPoint.Y;
 
+            // one for the player one for the computer
             amountOfTurns++;
             amountOfTurns++;
             GoodplayPlayer.Play();
+            // for the computer
             CreateStone(cellX, cellY);
             wait(1000);
             GoodplayPlayer.Play();
             showViableLocation = true;
             UpdateBoard();
-        }else
+        } else
         {
             BadplayPlayer.Play();
         }
@@ -865,6 +874,7 @@ void ImageBoxImage_MouseClick(object sender, MouseEventArgs mea) {
     UpdateBoard();
 }
 
+// if you click the button it resets the squares, populates the board and updates it
 newGameBtn.MouseClick += newGameBtn_MouseClick;
 void newGameBtn_MouseClick(object sender, MouseEventArgs mea) {
     for (int i = 0; i < amountOfCells; i++)
@@ -880,12 +890,15 @@ void newGameBtn_MouseClick(object sender, MouseEventArgs mea) {
     UpdateBoard();
 }
 
+// stops the sound and makes sure it doesnt play in other seettings or difficulty or rules
 void StopSound(object sender, EventArgs e) {
     scherm.Controls.Remove(SoundButtonOn);
     scherm.Controls.Add(SoundButtonOff);
+    playingSound = false;
     player.Stop();
 }
 
+// plays the sound and makes sure it doesnt start again in other seettings or difficulty or rules
 void PlaySound(object sender, EventArgs e) {
     scherm.Controls.Remove(SoundButtonOff);
     scherm.Controls.Add(SoundButtonOn);
@@ -898,6 +911,7 @@ void menu() {
         playingSound = true;
         player.PlayLooping();
     }
+
     DeleteAllWidgets();
 
     // scherm.BackColor = Color.FromArgb(32, 32, 32);
@@ -914,11 +928,13 @@ void menu() {
     scherm.Controls.Add(settings);
 }
 
+DifficultyMenuButton.MouseClick += BackToMenu;
 void BackToMenu(object sender, EventArgs e) {
     menu();
 }
 
 void DifficultyClickButton(object sender, EventArgs e) {
+    // checks which button is pressed
     if (sender == Easy) {
         amountOfCells = 6;
     } else if (sender == Medium) {
@@ -927,6 +943,7 @@ void DifficultyClickButton(object sender, EventArgs e) {
         amountOfCells = 10;
     }
 
+    // reset the squares with a width that is just chosen
     squares = new int[amountOfCells, amountOfCells];
 
     cellWidth = boardWidth/amountOfCells;
@@ -955,6 +972,7 @@ void showDifficulty() {
     scherm.Controls.Add(Medium);
     scherm.Controls.Add(Hard);
     scherm.Controls.Add(Continue);
+    scherm.Controls.Add(SoundButtonOn);
 
     Easy.MouseClick += DifficultyClickButton;
     Medium.MouseClick += DifficultyClickButton;
@@ -981,6 +999,7 @@ void changeMultiplayer(object sender, EventArgs e) {
 
 hamburgerMenu.MouseClick += showHamburgerMenu;
 void showHamburgerMenu(object sender, EventArgs e) {
+    // if you click on the hamburger menu it adds the label and the buttons and changes the location of the icon
     if (HamburgerBool) {
         HamburgerBool = false;
         hamburgerMenu.Location = new Point(50, 10);
@@ -990,6 +1009,7 @@ void showHamburgerMenu(object sender, EventArgs e) {
         scherm.Controls.Add(SettingsInGame);
         scherm.Controls.Add(HamburgerLabel);
     } else {
+        // removes the label and buttons and changes the location of the icon
         HamburgerBool = true;
         hamburgerMenu.Location = new Point(10, 10);
         scherm.Controls.Remove(newGameBtn);
@@ -1002,6 +1022,7 @@ void showHamburgerMenu(object sender, EventArgs e) {
 
 void DeleteAllWidgets() {
     try {
+        // deletes all widgets and makes sure it doesn't crash
         scherm.Controls.Remove(ImageBoxImage);
         scherm.Controls.Remove(newGameBtn);
         scherm.Controls.Remove(blueStonesLabel);
@@ -1015,6 +1036,7 @@ void DeleteAllWidgets() {
         scherm.Controls.Remove(newGame);    
         scherm.Controls.Remove(rules);
         scherm.Controls.Remove(SoundButtonOn);
+        scherm.Controls.Remove(SoundButtonOff);
         scherm.Controls.Remove(difficulty);
         scherm.Controls.Remove(DifficultyMenuButton);
         scherm.Controls.Remove(DifficultyText);
@@ -1042,6 +1064,7 @@ void DeleteAllWidgets() {
     } catch{}
 }
 
+rules.MouseClick += Rules;
 void Rules(object sender, EventArgs e) {
     if (!playingSound) {
         playingSound = true;
@@ -1052,10 +1075,9 @@ void Rules(object sender, EventArgs e) {
     scherm.Controls.Add(Continue);
     scherm.Controls.Add(RulesText);
     scherm.Controls.Add(PlayingRules);
+    scherm.Controls.Add(SoundButtonOn);
 }
 
-rules.MouseClick += Rules;
-DifficultyMenuButton.MouseClick += BackToMenu;
 settings.MouseClick += Settings;
 SettingsInGame.MouseClick += Settings;
 void Settings(object sender, EventArgs e) {
@@ -1071,11 +1093,13 @@ void Settings(object sender, EventArgs e) {
     scherm.Controls.Add(CheckViableLocationLabel);
     scherm.Controls.Add(Multiplayer);
     scherm.Controls.Add(MultiplayerLabel);
+    scherm.Controls.Add(SoundButtonOn);
 }
 
 void continueGame(object sender, EventArgs e) {
     DeleteAllWidgets();
     player.Stop();
+    // makes sure the sound stops playing and the hamburger menu is not extended
     playingSound = false;
     HamburgerBool = true;
     hamburgerMenu.Location = new Point(10, 10);
@@ -1098,11 +1122,13 @@ void continueGame(object sender, EventArgs e) {
 void startGame() {
     amountOfTurns = 0;
     player.Stop();
+    // makes sure the sound stops playing and the hamburger menu is not extended
     playingSound = false;
     HamburgerBool = true;
     hamburgerMenu.Location = new Point(10, 10);
     hamburgerMenu.ForceClose();
 
+    // makes a new board and populates it
     for (int i = 0; i < squares.GetLength(0); i++)
     {
         for (int j = 0; j < squares.GetLength(1); j++)
@@ -1133,5 +1159,4 @@ void startGame() {
 }
 
 menu();
-
 Application.Run(scherm);
